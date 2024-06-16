@@ -1,0 +1,35 @@
+name: Generate and Deploy Feeds
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Load Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Generate feeds and deploy
+      run: |
+        python script.py
+        echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
+        chmod 600 ./deploy_key
+        rsync -aPRv \
+          -e 'ssh -i ./deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no' \
+          feeds/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST}}:${{ secrets.DEPLOY_DIRECTORY }}
