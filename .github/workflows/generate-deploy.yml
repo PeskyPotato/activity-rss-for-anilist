@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: '0 8 * * *'
 
+env:
+  USERNAME: ${{ vars.USERNAME }}
+  LINK: ${{ vars.LINK }}
+
 jobs:
   build:
     name: Build and Deploy

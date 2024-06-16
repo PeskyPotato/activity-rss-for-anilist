@@ -6,8 +6,9 @@ import datetime
 root = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(root, 'templates')
 env = Environment(loader=FileSystemLoader(templates_dir))
-username = "PeskyPotato"
-link = "https://pesky.moe/feeds/"
+
+username = os.getenv('USERNAME', '')
+link = os.getenv('LINK', '')
 
 url = 'https://graphql.anilist.co'
 
