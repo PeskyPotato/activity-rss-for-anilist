@@ -80,7 +80,7 @@ def generate_feeds(userActivity):
         activities.append(item)
 
     template = env.get_template("rss.xml")
-    filename = f"activity-10-{media_title}.xml"
+    filename = f"anilist-10-{media_title}.xml"
     filename_dir = os.path.join(root, 'feeds', filename)
     os.makedirs(os.path.dirname(filename_dir), exist_ok=True)
     print(link, filename)
