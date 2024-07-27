@@ -9,6 +9,7 @@ env = Environment(loader=FileSystemLoader(templates_dir))
 
 username = os.getenv('USERNAME', '')
 link = os.getenv('LINK', '')
+perPage = os.getenv('PER_PAGE', 10)
 
 url = 'https://graphql.anilist.co'
 
@@ -31,10 +32,10 @@ def getUserID(name):
     return (response.json())
 
 
-def listActivity(userId):
+def listActivity(userId, perPage):
     query = '''
-    query ($userId: Int) {
-      Page(page: 1, perPage:10) {
+    query ($userId: Int, $perPage: Int) {
+      Page(page: 1, perPage:$perPage) {
         activities(userId: $userId, sort: ID_DESC) {
           ... on ListActivity {
             type
@@ -56,7 +57,8 @@ def listActivity(userId):
     '''
 
     variables = {
-        'userId': userId
+        'userId': userId,
+        'perPage': perPage
     }
 
     response = requests.post(url, json={'query': query, 'variables': variables})
@@ -64,7 +66,7 @@ def listActivity(userId):
     return (response.json())
 
 
-def generate_feeds(userActivity):
+def generate_feeds(userActivity, perPage):
     media_title = 'romaji'
     activities = []
     for activity in userActivity['data']['Page']['activities']:
@@ -80,7 +82,7 @@ def generate_feeds(userActivity):
         activities.append(item)
 
     template = env.get_template("rss.xml")
-    filename = f"anilist-10-{media_title}.xml"
+    filename = f"anilist-{perPage}-{media_title}.xml"
     filename_dir = os.path.join(root, 'feeds', filename)
     os.makedirs(os.path.dirname(filename_dir), exist_ok=True)
     print(link, filename)
@@ -98,5 +100,5 @@ def generate_feeds(userActivity):
 
 r = getUserID(username)
 userId = r.get('data').get('User').get('id')
-userActivity = listActivity(userId)
-generate_feeds(userActivity)
+userActivity = listActivity(userId, perPage)
+generate_feeds(userActivity, perPage)

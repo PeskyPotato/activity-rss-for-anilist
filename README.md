@@ -38,6 +38,7 @@ Set the username and and URL to the website for the feed as environment variable
 ```bash
 export USERNAME=PeskyPotato
 export LINK=https://pesky.moe/feeds/
+export PER_PAGE=10
 ```
 
 Run the script:
@@ -45,7 +46,7 @@ Run the script:
 python script.py
 ```
 
-The XML file will be created in the `feeds/` directory. It will contain the 10 latest activities using the medias romaji title.
+The XML file will be created in the `feeds/` directory. It will whatever number of activities was set by `PER_PAGE` or 10 if none was set.
 
 ## License
 MIT
