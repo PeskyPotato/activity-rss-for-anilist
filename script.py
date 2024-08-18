@@ -2,6 +2,7 @@ import requests
 import os
 from jinja2 import Environment, FileSystemLoader
 import datetime
+import rss_py
 
 root = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(root, 'templates')
@@ -76,26 +77,27 @@ def generate_feeds(userActivity, perPage):
             title = f"{username} {activity.get('status')} {activity.get('progress')} of {activity['media']['title'].get('romaji')}"
         item = {
             'title': title,
-            'pubDate': datetime.datetime.fromtimestamp(activity.get('createdAt')).strftime("%a, %d %b %Y %H:%M:%S +0000"),
-            'url': activity.get('siteUrl')
+            'pubDate': datetime.datetime.fromtimestamp(activity.get('createdAt'), tz=datetime.timezone.utc),
+            'link': activity.get('siteUrl')
         }
         activities.append(item)
 
-    template = env.get_template("rss.xml")
     filename = f"anilist-{perPage}-{media_title}.xml"
     filename_dir = os.path.join(root, 'feeds', filename)
     os.makedirs(os.path.dirname(filename_dir), exist_ok=True)
     print(link, filename)
     with open(filename_dir, "w") as fh:
-        fh.write(template.render(
-            title=f"{username}'s AniList User Activity",
-            link=link,
-            link_rss=link+filename,
-            description=f"The unofficial AniList user activity feed for {username}.",
-            language="en-gb",
-            lastBuildDate=datetime.datetime.now(datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000"),
-            items=activities
-        ))
+        fh.write(
+            rss_py.build(
+                title=f"{username}'s AniList User Activity",
+                link=link,
+                description=f"The unofficial AniList user activity feed for {username}.",
+                language="en-gb",
+                lastBuildDate=datetime.datetime.now(datetime.timezone.utc),
+                atomSelfLink=f"{link}{filename}",
+                items=activities
+            )
+        )
 
 
 r = getUserID(username)

@@ -1,2 +1,3 @@
 jinja2
 requests
+rss_py @ git+https://github.com/PeskyPotato/rss_py.git@main
