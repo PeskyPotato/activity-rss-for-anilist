@@ -51,16 +51,17 @@ python script.py
 The same variables can be set as arugments as well:
 ```bash
 $ python3 script.py --help
-usage: script.py [-h] [--username USERNAME] [--link LINK] [--per-page PER_PAGE]
+usage: script.py [-h] [--username USERNAME] [--link LINK] [--per-page PER_PAGE] [--output OUTPUT]
 
 options:
   -h, --help           show this help message and exit
   --username USERNAME  Anilist username
   --link LINK          Link to use for the RSS feed channel
   --per-page PER_PAGE  Maximum items to include in the RSS feed
+  --output OUTPUT      Ouput directory of the RSS feed
 ```
 
-The XML file will be created in the `feeds/` directory.
+The XML file will be created in the `feeds/` directory by default unless `--output` was specified.
 
 ### Python import
 You can import the script into another python file and call `main()` with the `username`, `link` and `per_page` paramters to generate and RSS feed.
@@ -68,7 +69,7 @@ You can import the script into another python file and call `main()` with the `u
 ```python
 from script import main as anilist_rss
 
-anilist_rss("peskypotato", "https://example.com/", 5)
+anilist_rss("peskypotato", "https://example.com/", 5, output="./rss")
 ```
 
 The feed will be created in the `feeds/` directory.

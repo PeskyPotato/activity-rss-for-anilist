@@ -64,7 +64,7 @@ def listActivity(userId, perPage):
     return (response.json())
 
 
-def generate_feeds(username, link, userActivity, perPage):
+def generate_feeds(username, link, userActivity, perPage, output):
     media_title = 'romaji'
     activities = []
     for activity in userActivity['data']['Page']['activities']:
@@ -81,6 +81,10 @@ def generate_feeds(username, link, userActivity, perPage):
 
     filename = f"anilist-{perPage}-{media_title}.xml"
     filename_dir = os.path.join(root, 'feeds', filename)
+    if output:
+      filename_dir = os.path.join(
+         os.path.abspath(output), filename
+      )
     os.makedirs(os.path.dirname(filename_dir), exist_ok=True)
     print(link, filename)
     with open(filename_dir, "w") as fh:
@@ -106,17 +110,16 @@ def cli_entry():
   parser.add_argument("--per-page", default=os.getenv('PER_PAGE', ''),
                       type=int,
                       help="Maximum items to include in the RSS feed")
+  parser.add_argument("--output", help="Ouput directory of the RSS feed")
 
   args = parser.parse_args()
-  main(args.username, args.link, args.per_page)
+  main(args.username, args.link, args.per_page, args.output)
 
-def main(username=None, link=None, perPage=None):
-  print(username, perPage, link)
-
+def main(username=None, link=None, perPage=None, output=None):
   r = getUserID(username)
   userId = r.get('data').get('User').get('id')
   userActivity = listActivity(userId, perPage)
-  generate_feeds(username, link, userActivity, perPage)
+  generate_feeds(username, link, userActivity, perPage, output)
 
 if __name__ == "__main__":
     cli_entry()
