@@ -2,15 +2,12 @@ import requests
 import os
 from jinja2 import Environment, FileSystemLoader
 import datetime
+import argparse
 import rss_py
 
 root = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(root, 'templates')
 env = Environment(loader=FileSystemLoader(templates_dir))
-
-username = os.getenv('USERNAME', '')
-link = os.getenv('LINK', '')
-perPage = os.getenv('PER_PAGE', 10)
 
 url = 'https://graphql.anilist.co'
 
@@ -67,7 +64,7 @@ def listActivity(userId, perPage):
     return (response.json())
 
 
-def generate_feeds(userActivity, perPage):
+def generate_feeds(username, link, userActivity, perPage):
     media_title = 'romaji'
     activities = []
     for activity in userActivity['data']['Page']['activities']:
@@ -100,7 +97,27 @@ def generate_feeds(userActivity, perPage):
         )
 
 
-r = getUserID(username)
-userId = r.get('data').get('User').get('id')
-userActivity = listActivity(userId, perPage)
-generate_feeds(userActivity, perPage)
+def cli_entry():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--username",
+                      default=os.getenv('USERNAME', ''),
+                      help="Anilist username")
+  parser.add_argument("--link", default=os.getenv('LINK', ''),
+                      help="Link to use for the RSS feed channel")
+  parser.add_argument("--per-page", default=os.getenv('PER_PAGE', ''),
+                      type=int,
+                      help="Maximum items to include in the RSS feed")
+
+  args = parser.parse_args()
+  main(args.username, args.link, args.per_page)
+
+def main(username=None, link=None, perPage=None):
+  print(username, perPage, link)
+
+  r = getUserID(username)
+  userId = r.get('data').get('User').get('id')
+  userActivity = listActivity(userId, perPage)
+  generate_feeds(username, link, userActivity, perPage)
+
+if __name__ == "__main__":
+    cli_entry()
