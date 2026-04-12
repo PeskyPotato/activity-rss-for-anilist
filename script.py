@@ -72,11 +72,11 @@ def generate_feeds(username, link, userActivity, perPage):
             title = f"{username} {activity.get('status')} {activity['media']['title'].get(media_title)}"
         else:
             title = f"{username} {activity.get('status')} {activity.get('progress')} of {activity['media']['title'].get('romaji')}"
-        item = {
-            'title': title,
-            'pubDate': datetime.datetime.fromtimestamp(activity.get('createdAt'), tz=datetime.timezone.utc),
-            'link': activity.get('siteUrl')
-        }
+        item = rss_py.Item(
+            title=title,
+            pubDate=datetime.datetime.fromtimestamp(activity.get('createdAt'), tz=datetime.timezone.utc),
+            link=activity.get('siteUrl')
+        )
         activities.append(item)
 
     filename = f"anilist-{perPage}-{media_title}.xml"
@@ -84,17 +84,16 @@ def generate_feeds(username, link, userActivity, perPage):
     os.makedirs(os.path.dirname(filename_dir), exist_ok=True)
     print(link, filename)
     with open(filename_dir, "w") as fh:
-        fh.write(
-            rss_py.build(
-                title=f"{username}'s AniList User Activity",
-                link=link,
-                description=f"The unofficial AniList user activity feed for {username}.",
-                language="en-gb",
-                lastBuildDate=datetime.datetime.now(datetime.timezone.utc),
-                atomSelfLink=f"{link}{filename}",
-                items=activities
-            )
+        feed = rss_py.Channel(
+            title=f"{username}'s AniList User Activity",
+            link=link,
+            description=f"The unofficial AniList user activity feed for {username}.",
+            language="en-gb",
+            lastBuildDate=datetime.datetime.now(datetime.timezone.utc),
+            atomSelfLink=f"{link}{filename}",
+            items=activities
         )
+        fh.write(rss_py.build(feed))
 
 
 def cli_entry():
